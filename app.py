@@ -1,9 +1,8 @@
 from flask import Flask, render_template, redirect, request, session, abort
 from flask_sqlalchemy import SQLAlchemy
 import uuid
-from flask_login import LoginManager, login_user, logout_user, current_user, login_required, UserMixin
-from random import choices
-from zenora import APIClient, User, UserAPI
+from flask_login import LoginManager, login_user, current_user, login_required, UserMixin
+from zenora import APIClient, User
 from dhooks import Webhook, Embed
 from functools import wraps
 from sqlalchemy import desc
@@ -13,6 +12,9 @@ from functools import wraps
 from dhooks import Webhook, Embed
 from flask_session_captcha import FlaskSessionCaptcha
 from flask_sessionstore import Session
+import yaml
+
+cfg = yaml.safe_load("config.yaml")
 
 load_dotenv()
 
@@ -23,7 +25,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = uuid.uuid4()
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
 app.config['CAPTCHA_ENABLE'] = True
-app.config['CAPTCHA_LENGTH'] = 20
+app.config['CAPTCHA_LENGTH'] = 5
 app.config['CAPTCHA_WIDTH'] = 160
 app.config['CAPTCHA_HEIGHT'] = 60
 app.config['CAPTCHA_SESSION_KEY'] = 'captcha_image'
@@ -141,7 +143,7 @@ def add_station():
     luna.send("<@&1064583842322722968>", embed=e)
     if captcha.validate():
         return render_template("success.html", current_user=current_user, discord=get_discord(), station=station)
-    abort(429)
+    return '<script>history.back()</script>'
 
 
 @app.route("/admin/station/<id>/approve")
@@ -169,6 +171,7 @@ def station_decline(id):
     db.session.commit()
     e = Embed()
     e.title = "Station Declined"
+    print("Station added")
     e.add_field("Station", f'**{station.name}**')
     e.add_field("Owner", f'<@{station.owner}>')
     e.add_field("Moderator", f'<@{get_discord().id}>')
@@ -245,4 +248,4 @@ def callback():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(cfg["host"]["addr"], cfg["host"]["port"])
