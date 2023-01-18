@@ -35,7 +35,7 @@ db = SQLAlchemy(app)
 Session(app)
 
 captcha = FlaskSessionCaptcha(app)
-TEAM = [835805656853905428, 685180177419993102]
+TEAM = cfg["team"]
 loginManager = LoginManager(app)
 
 luna = Webhook(

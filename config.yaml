@@ -8,3 +8,7 @@ db:
 captcha:
   type: image
   length: 20
+
+team:
+  - 835805656853905428
+  - 685180177419993102
