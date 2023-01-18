@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RadioSearch.XYZ</title>
+    <link rel="stylesheet" href="/static/w3.css">
+    <link rel="stylesheet" href="/static/modern.css">
+</head>
+
+<body>
+    
+    <div class="w3-bar w3-deep-purple">
+        <form action="/search">
+            <input name="query" class="w3-deep-purple w3-animate-input w3-bordered w3-border w3-bar-item w3-margin w3-round"
+            style="width:10%; max-width: 50%;" placeholder="Enter a Search Query..." class="w3-input">
+            <div class="w3-bar-item"><button type="submit" class="w3-button w3-deep-purple">Search</button></div>
+            <div class="w3-bar-item"><a class="w3-button w3-deep-purple" href="/top">Browse...</a></div>
+            {%if not current_user.is_authenticated %}<div class="w3-bar-item"><a class="w3-button w3-deep-purple"
+                href="/auth/login">Login</a></div>
+                {%else%}
+                <div class="w3-bar-item"><a class="w3-button w3-deep-purple" href="/submit">Submit</a></div>
+                {%endif%}
+            </form>
+        </div>
+        <h1>Welcome, {{discord.name}}</h1>
+        <ul>
+        {% for radio in bots %}
+            <li style="display: inline-block; list-style-type: none;"><div class="w3-card-4 w3-container w3-deep-purple" style="max-width: max-content; padding: 25px;">
+                <img class="w3-round-xxlarge w3-border" src="{{radio.image_url}}" style="width: 128px; height: auto;">
+                <p>{{radio.name}}</p>
+                <a href="/admin/{{radio.id}}"><button class="w3-button w3-black">View</button></a>&nbsp;&nbsp;&nbsp;&nbsp;<a
+                href="/external_link?url={{radio.link}}"><button class="w3-button w3-black">Listen</button></a>
+            </div></li>
+            {% endfor %}
+        </ul>
+
+</body>
+
+</html>

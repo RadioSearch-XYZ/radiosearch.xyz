@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Radio | RadioSearch</title>
+    <link href="/static/modern.css" rel="stylesheet">
+    <link href="/static/w3.css" rel="stylesheet">
+</head>
+
+<body style="background-color: #080956;color: #fff;">
+        <div class="w3-bar w3-deep-purple">
+            <form action="/search">
+                <input name="query" class="w3-deep-purple w3-animate-input w3-bordered w3-border w3-bar-item w3-margin w3-round"
+                    style="width:10%; max-width: 50%;" placeholder="Enter a Search Query..." class="w3-input">
+                <div class="w3-bar-item"><button type="submit" class="w3-button w3-deep-purple">Search</button></div>
+                <div class="w3-bar-item"><a class="w3-button w3-deep-purple" href="/top">Browse...</a></div>
+                <div class="w3-bar-item"><a class="w3-button w3-deep-purple" href="/auth/login">Login</a></div>
+        
+            </form>
+        </div>
+    <form action="/add-radio.dhp" method="post">
+        <div class="form-group">
+            <label for="botID">Name</label>
+            <input type="text"  class="w3-input w3-round w3-animate-input" style="width: 20%;"  id="botID" name="botID" aria-describedby="emailHelp"
+                placeholder="Enter Name" required>
+        </div>
+        <div class="form-group">
+            <label for="shortDsc">Short Description</label>
+            <input type="text" class="w3-input w3-round w3-animate-input" style="width: 20%;" id="shortDsc" name="shortDsc"
+                placeholder="Short Description (Max 200)" maxlength="200" required>
+        </div>
+        <div class="form-group">
+            <label for="lonkDsc">Long Description</label><br>
+            <textarea type="text"  class="w3-input w3-round w3-animate-input" style="width: 20%;"  id="lonkDsc" name="long" placeholder="Long Description"
+                maxlength="10000" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="imglink">Icon URL</label>
+            <input type="text"  class="w3-input w3-round w3-animate-input" style="width: 20%;" id="imglink" name="imglink" placeholder="https://i.imgur.com/..."
+                maxlength="200">
+        </div>
+        <div class="">
+            <label for="invite">Stream Link</label>
+            <input type="text"  class="w3-input w3-round w3-animate-input" style="width: 20%;"  id="invite" name="link"
+                placeholder="https://myradio.stream/listen..." maxlength="300" required>
+
+        </div>
+        <div class="w3-border">
+            <label for="captcha">Prove you're not a Robot...</label>
+            {{captcha()}}
+                <input type="text" name="captcha" placeholder="Enter the Text above..." required>
+        
+        </div>
+        <input type="submit" class="btn btn-primary" value="Submit">
+    </form>
+</body>
+
+</html>

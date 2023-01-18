@@ -1,0 +1,248 @@
+from flask import Flask, render_template, redirect, request, session, abort
+from flask_sqlalchemy import SQLAlchemy
+import uuid
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required, UserMixin
+from random import choices
+from zenora import APIClient, User, UserAPI
+from dhooks import Webhook, Embed
+from functools import wraps
+from sqlalchemy import desc
+from dotenv import load_dotenv
+import os
+from functools import wraps
+from dhooks import Webhook, Embed
+from flask_session_captcha import FlaskSessionCaptcha
+from flask_sessionstore import Session
+
+load_dotenv()
+
+app = Flask(__name__)
+client = APIClient(os.getenv("TOKEN"),
+                   client_secret=os.getenv("CLIENT_SECRET"))
+app = Flask(__name__)
+app.config["SECRET_KEY"] = uuid.uuid4()
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+app.config['CAPTCHA_ENABLE'] = True
+app.config['CAPTCHA_LENGTH'] = 20
+app.config['CAPTCHA_WIDTH'] = 160
+app.config['CAPTCHA_HEIGHT'] = 60
+app.config['CAPTCHA_SESSION_KEY'] = 'captcha_image'
+app.config['SESSION_TYPE'] = 'sqlalchemy'
+app.app_context().push()
+db = SQLAlchemy(app)
+Session(app)
+
+captcha = FlaskSessionCaptcha(app)
+TEAM = [835805656853905428, 685180177419993102]
+loginManager = LoginManager(app)
+
+luna = Webhook(
+    "https://discord.com/api/webhooks/1064620470516858901/Ghi7BN_DBEZk6XiQL8otUcN8OHBnJ_v9Jrv-2V5SuDWgLIiX3hIT1CxCFsZdoX7l35D_")
+lina = Webhook(
+    "https://discord.com/api/webhooks/1064630092208283809/xNxUXNDe9FOR1ort3lbi3dJw428oMGIIhS8k5wiSd6lQUvVoM5niWO7nz-ucoplrRaaR")
+lana = Webhook(
+    "https://discord.com/api/webhooks/1064638178079817829/fPG-lvBdKDHle9CG6UMftMHt1PWc_zXyC_xvD2c5KsfuancJkVXQU_Zck9itRe1bvIou")
+
+
+def get_discord():
+    class U:
+        def __init__(self, **vars):
+            for k, v in vars.items():
+                setattr(self, k, v)
+    print(session["USER"])
+    if session["USER"]:
+        return U(**session["USER"])
+    else:
+        return U(name="Jane Doe", avatar_url="https://directemployers.org/wp-content/uploads/2018/08/avatar-JaneDoe.jpg", id=0, accent_color=None, discriminator="0000")
+
+
+@loginManager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
+
+@app.errorhandler(401)
+def unauthorized(e=None):
+    return render_template("unauthorized.html", current_user=current_user, discord=get_discord())
+
+
+@app.errorhandler(403)
+def forbidden(e=None):
+    return render_template("forbidden.html", current_user=current_user, discord=get_discord())
+
+
+@app.errorhandler(404)
+def notfound(e=None):
+    return render_template("notFound.html", current_user=current_user, discord=get_discord())
+
+
+def admin_ensure(func):
+
+    @wraps(func)
+    def predicate(*args, **kwargs):
+        if current_user.id in TEAM:
+            return func(*args, **kwargs)
+        return abort(403)
+    return predicate
+
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer(), primary_key=True)
+    bio = db.Column(db.String(150))
+
+
+class Radio(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(512))
+    image_url = db.Column(db.String(512))
+    vote_count = db.Column(db.Integer, default=0, nullable=True)
+    approved = db.Column(db.Integer, default=0, nullable=True)
+    link = db.Column(db.String(200))
+    owner = db.Column(db.Integer)
+    short = db.Column(db.String(200))
+    long = db.Column(db.String(10000))
+
+
+@app.before_request
+def before_request():
+    if not "USER" in session:
+        session["USER"] = {}
+    return
+
+
+@app.route("/")
+def root():
+    return render_template("index.html", current_user=current_user, radios=(Radio.query.filter_by(approved=1).all()))
+
+
+@app.route("/top")
+def top():
+    return render_template("index.html", current_user=current_user, radios=(Radio.query.filter_by(approved=1).order_by(desc(Radio.vote_count)).all()))
+
+
+@app.route("/add-radio.dhp", methods=["POST"])
+@login_required
+def add_bot():
+    bot_id = request.form["botID"]
+    short = request.form["shortDsc"]
+    long = request.form["long"]
+    image = request.form.get("imglink")
+    invite = request.form["link"]
+
+    bot = Radio(owner=session["USER"]["id"], short=short, long=long, link=invite,
+                image_url=image, name=bot_id)
+    db.session.add(bot)
+    db.session.commit()
+    e = Embed(color=0x5865F2)
+    e.title = "Station Submitted"
+    e.add_field("Station", f'{bot_id}')
+    e.add_field("User", f'<@{current_user.id}>')
+    e.set_image(image)
+    luna.send("<@&1064583842322722968>", embed=e)
+    if captcha.validate():
+        return render_template("success.html", current_user=current_user, discord=get_discord(), bot=bot)
+    abort(429)
+
+
+@app.route("/admin/bot/<id>/approve")
+@login_required
+@admin_ensure
+def bot_approve(id):
+    bot: Radio = Radio.query.get(id)
+    bot.approved = 1
+    db.session.commit()
+    e = Embed()
+    e.title = "Station Approved"
+    e.add_field("Station", f'**[{bot.name}](https://example.com)**')
+    e.add_field("Owner", f'<@{bot.owner}>')
+    e.add_field("Moderator", f'<@{get_discord().id}>')
+    lana.send(embed=e)
+    return render_template("redirecting.html", current_user=current_user, discord=get_discord(), cstr="Station Approved! Redirecting...", to="/panel")
+
+
+@app.route("/admin/<id>/decline", methods=["post"])
+@login_required
+@admin_ensure
+def bot_decline(id):
+    bot = Radio.query.get(id)
+    db.session.delete(bot)
+    db.session.commit()
+    e = Embed()
+    e.title = "Station Declined"
+    e.add_field("Station", f'**{bot.name}**')
+    e.add_field("Owner", f'<@{bot.owner}>')
+    e.add_field("Moderator", f'<@{get_discord().id}>')
+    e.add_field("Reason", request.form["reason"])
+    lana.send(f'<@{bot.owner}>', embed=e)
+    return render_template("redirecting.html", current_user=current_user, discord=get_discord(), cstr="Station Declined! Redirecting...", to="/panel")
+
+
+@app.route("/admin/<int:id>")
+@admin_ensure
+def adminview(id):
+    return render_template("staffradio.html", current_user=current_user, discord=get_discord(), radio=Radio.query.filter_by(id=id, approved=0).first())
+
+
+@app.route("/view/<int:id>")
+def view(id):
+    return render_template("radio.html", current_user=current_user, discord=get_discord(), radio=Radio.query.filter_by(id=id, approved=1).first())
+
+
+@app.route("/admin/<int:id>/decision")
+@admin_ensure
+def admindec(id):
+    return render_template("decision.html", current_user=current_user, discord=get_discord(), bot=Radio.query.filter_by(id=id, approved=0).first())
+
+
+@app.route("/panel")
+@admin_ensure
+def adminpanel():
+    return render_template("panel.html", current_user=current_user, discord=get_discord(), bots=Radio.query.filter_by(approved=0).all())
+
+
+@app.route("/external_link")
+def extlink():
+    url = request.args.get("url")
+
+    return render_template("redirecting.html", cstr=f'Redirecting you to external page "{url}"...', current_user=current_user, discord=get_discord(), to=url)
+
+
+@app.route("/auth/login")
+def login():
+    return redirect(os.getenv("OAUTH_URL"))
+
+
+@app.route("/submit")
+@login_required
+def submit():
+    return render_template("addradio.html", current_user=current_user)
+
+
+@app.route("/auth/callback")
+def callback():
+    code = request.args.get("code")
+    resp = client.oauth.get_access_token(code, os.getenv("REDIRECT_URI"))
+    bearer_client = APIClient(resp.access_token, bearer=True)
+    currentUser = bearer_client.users.get_current_user()
+    if User.query.filter_by(id=currentUser.id).first():
+        u = User.query.filter_by(id=currentUser.id).first()
+        login_user(u)
+    else:
+        u = User(id=currentUser.id, bio="Hey there!")
+        db.session.add(u)
+        db.session.commit()
+        login_user(u)
+    session["USER"] = {
+        "name": currentUser.username,
+        "id": currentUser.id,
+        "avatar_url": currentUser.avatar_url,
+        "accent_color": currentUser.accent_color,
+        "discriminator": currentUser.discriminator,
+    }
+    lina.send(
+        f"{currentUser.username} has logged in")
+    return render_template("redirecting.html", current_user=current_user, discord=get_discord(), cstr="You are being logged in...", to="/")
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

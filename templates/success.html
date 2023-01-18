@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RadioSearch.xyz</title>
+    <link rel="stylesheet" href="/static/w3.css">
+    <link href="/static/modern.css" rel="stylesheet" type="text/css" />
+    <link href="/static/success.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="w3-bar w3-deep-purple">
+        <form action="/search">
+            <input name="query"
+                class="w3-deep-purple w3-animate-input w3-bordered w3-border w3-bar-item w3-margin w3-round"
+                style="width:10%; max-width: 50%;" placeholder="Enter a Search Query..." class="w3-input">
+            <div class="w3-bar-item"><button type="submit" class="w3-button w3-deep-purple">Search</button></div>
+            <div class="w3-bar-item"><a class="w3-button w3-deep-purple" href="/top">Browse...</a></div>
+            {%if not current_user.is_authenticated %}<div class="w3-bar-item"><a class="w3-button w3-deep-purple"
+                    href="/auth/login">Login</a></div>
+            {%else%}
+            <div class="w3-bar-item"><a class="w3-button w3-deep-purple" href="/submit">Submit</a></div>
+            {%endif%}
+        </form>
+    </div>
+    <div class="w3-container">
+
+    <div class="w3-card-4">
+        <div style="border-radius:200px; height:200px; width:200px; background: #F8FAF5; margin:0 auto;">
+            <i class="checkmark">✓</i>
+        </div>
+        <h1>Success</h1>
+        <p>Your Station ({{bot.name}}) has been added to the Queue and will be reviewed shortly!</p>
+    </div>
+    </div>
+    <hr>
+</body>
+
+</html>
