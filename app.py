@@ -122,39 +122,39 @@ def top():
 
 @app.route("/add-radio.dhp", methods=["POST"])
 @login_required
-def add_bot():
-    bot_id = request.form["botID"]
+def add_station():
+    station_id = request.form["stationID"]
     short = request.form["shortDsc"]
     long = request.form["long"]
     image = request.form.get("imglink")
     invite = request.form["link"]
 
-    bot = Radio(owner=session["USER"]["id"], short=short, long=long, link=invite,
-                image_url=image, name=bot_id)
-    db.session.add(bot)
+    station = Radio(owner=session["USER"]["id"], short=short, long=long, link=invite,
+                    image_url=image, name=station_id)
+    db.session.add(station)
     db.session.commit()
     e = Embed(color=0x5865F2)
     e.title = "Station Submitted"
-    e.add_field("Station", f'{bot_id}')
+    e.add_field("Station", f'{station_id}')
     e.add_field("User", f'<@{current_user.id}>')
     e.set_image(image)
     luna.send("<@&1064583842322722968>", embed=e)
     if captcha.validate():
-        return render_template("success.html", current_user=current_user, discord=get_discord(), bot=bot)
+        return render_template("success.html", current_user=current_user, discord=get_discord(), station=station)
     abort(429)
 
 
-@app.route("/admin/bot/<id>/approve")
+@app.route("/admin/station/<id>/approve")
 @login_required
 @admin_ensure
-def bot_approve(id):
-    bot: Radio = Radio.query.get(id)
-    bot.approved = 1
+def station_approve(id):
+    station: Radio = Radio.query.get(id)
+    station.approved = 1
     db.session.commit()
     e = Embed()
     e.title = "Station Approved"
-    e.add_field("Station", f'**[{bot.name}](https://example.com)**')
-    e.add_field("Owner", f'<@{bot.owner}>')
+    e.add_field("Station", f'**[{station.name}](https://example.com)**')
+    e.add_field("Owner", f'<@{station.owner}>')
     e.add_field("Moderator", f'<@{get_discord().id}>')
     lana.send(embed=e)
     return render_template("redirecting.html", current_user=current_user, discord=get_discord(), cstr="Station Approved! Redirecting...", to="/panel")
@@ -163,17 +163,17 @@ def bot_approve(id):
 @app.route("/admin/<id>/decline", methods=["post"])
 @login_required
 @admin_ensure
-def bot_decline(id):
-    bot = Radio.query.get(id)
-    db.session.delete(bot)
+def station_decline(id):
+    station = Radio.query.get(id)
+    db.session.delete(station)
     db.session.commit()
     e = Embed()
     e.title = "Station Declined"
-    e.add_field("Station", f'**{bot.name}**')
-    e.add_field("Owner", f'<@{bot.owner}>')
+    e.add_field("Station", f'**{station.name}**')
+    e.add_field("Owner", f'<@{station.owner}>')
     e.add_field("Moderator", f'<@{get_discord().id}>')
     e.add_field("Reason", request.form["reason"])
-    lana.send(f'<@{bot.owner}>', embed=e)
+    lana.send(f'<@{station.owner}>', embed=e)
     return render_template("redirecting.html", current_user=current_user, discord=get_discord(), cstr="Station Declined! Redirecting...", to="/panel")
 
 
@@ -191,13 +191,13 @@ def view(id):
 @app.route("/admin/<int:id>/decision")
 @admin_ensure
 def admindec(id):
-    return render_template("decision.html", current_user=current_user, discord=get_discord(), bot=Radio.query.filter_by(id=id, approved=0).first())
+    return render_template("decision.html", current_user=current_user, discord=get_discord(), station=Radio.query.filter_by(id=id, approved=0).first())
 
 
 @app.route("/panel")
 @admin_ensure
 def adminpanel():
-    return render_template("panel.html", current_user=current_user, discord=get_discord(), bots=Radio.query.filter_by(approved=0).all())
+    return render_template("panel.html", current_user=current_user, discord=get_discord(), stations=Radio.query.filter_by(approved=0).all())
 
 
 @app.route("/external_link")
