@@ -1,3 +1,10 @@
 host:
   addr: 0.0.0.0 # On all Addresses
   port: 80 # Standard HTTP Port
+
+db:
+  addr: "sqlite://app.db"
+
+captcha:
+  type: image
+  length: 20
