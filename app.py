@@ -37,11 +37,11 @@ TEAM = [835805656853905428, 685180177419993102]
 loginManager = LoginManager(app)
 
 luna = Webhook(
-    "https://discord.com/api/webhooks/1064620470516858901/Ghi7BN_DBEZk6XiQL8otUcN8OHBnJ_v9Jrv-2V5SuDWgLIiX3hIT1CxCFsZdoX7l35D_")
+    os.environ["LUNA"])
 lina = Webhook(
-    "https://discord.com/api/webhooks/1064630092208283809/xNxUXNDe9FOR1ort3lbi3dJw428oMGIIhS8k5wiSd6lQUvVoM5niWO7nz-ucoplrRaaR")
+    os.environ["LINA"])
 lana = Webhook(
-    "https://discord.com/api/webhooks/1064638178079817829/fPG-lvBdKDHle9CG6UMftMHt1PWc_zXyC_xvD2c5KsfuancJkVXQU_Zck9itRe1bvIou")
+    os.environ["LANA"])
 
 
 def get_discord():
