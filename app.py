@@ -14,7 +14,7 @@ from flask_session_captcha import FlaskSessionCaptcha
 from flask_sessionstore import Session
 import yaml
 
-cfg = yaml.safe_load("config.yaml")
+cfg = yaml.safe_load(open("config.yaml"))
 
 load_dotenv()
 
@@ -159,7 +159,7 @@ def station_approve(id):
     e.add_field("Owner", f'<@{station.owner}>')
     e.add_field("Moderator", f'<@{get_discord().id}>')
     lana.send(embed=e)
-    return render_template("redirecting.html", current_user=current_user, discord=get_discord(), cstr="Station Approved! Redirecting...", to="/panel")
+    return redirect("/panel")
 
 
 @app.route("/admin/<id>/decline", methods=["post"])
@@ -177,7 +177,7 @@ def station_decline(id):
     e.add_field("Moderator", f'<@{get_discord().id}>')
     e.add_field("Reason", request.form["reason"])
     lana.send(f'<@{station.owner}>', embed=e)
-    return render_template("redirecting.html", current_user=current_user, discord=get_discord(), cstr="Station Declined! Redirecting...", to="/panel")
+    return redirect("/panel")
 
 
 @app.route("/admin/<int:id>")
@@ -207,7 +207,7 @@ def adminpanel():
 def extlink():
     url = request.args.get("url")
 
-    return render_template("redirecting.html", cstr=f'Redirecting you to external page "{url}"...', current_user=current_user, discord=get_discord(), to=url)
+    return redirect(url)
 
 
 @app.route("/auth/login")
