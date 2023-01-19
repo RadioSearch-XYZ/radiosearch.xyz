@@ -1,5 +1,4 @@
 .env
-build/
 ignore/
 __pycache__
 *.db
@@ -15,7 +14,6 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
 develop-eggs/
 dist/
 downloads/
