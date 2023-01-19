@@ -30,7 +30,7 @@
         <li style="display: inline-block; list-style-type: none;"><div class="w3-card-4 w3-container w3-deep-purple" style="max-width: max-content; padding: 25px;">
             <img class="w3-round-xxlarge w3-border" src="{{radio.image_url}}" style="width: 128px; height: auto;">
             <p>{{radio.name}}</p>
-            <a href="/view/{{radio.id}}"><button class="w3-button w3-black">View</button></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/external_link?url={{radio.link}}"><button class="w3-button w3-black">Listen</button></a>
+            <a href="/view/{{radio.id}}"><button class="w3-button w3-black">View</button></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="{{radio.link}}"><button class="w3-button w3-black">Listen</button></a>
         </div></li>
         {% endfor %}
         </ul>
