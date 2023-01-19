@@ -122,6 +122,12 @@ def top():
     return render_template("index.html", current_user=current_user, radios=(Radio.query.filter_by(approved=1).order_by(desc(Radio.vote_count)).all()))
 
 
+@app.route("/search")
+def search():
+    qu = request.args.get("query")
+    return render_template("index.html", current_user=current_user, radios=(Radio.query.filter_by(approved=1, name=Radio.name.contains(qu)).order_by(desc(Radio.vote_count)).all()))
+
+
 @app.route("/add-radio.dhp", methods=["POST"])
 @login_required
 def add_station():
