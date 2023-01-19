@@ -20,3 +20,9 @@ python-installs:
 
 db:
 	python3 -c 'from app import app, db;app.app_context().push();db.create_all()'
+
+clean:
+	rm -rfv  __pycache__ build *.spec
+
+reset:
+	python3 -c 'from app import app, db, Radio;app.app_context().push();db.session.delete(Radio.query.all());db.session.commit();exit(0)'

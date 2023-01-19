@@ -1,5 +1,6 @@
 .env
 build/
+ignore/
 __pycache__
 *.db
 
