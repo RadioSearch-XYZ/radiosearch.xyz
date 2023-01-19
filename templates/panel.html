@@ -32,7 +32,7 @@
                 <img class="w3-round-xxlarge w3-border" src="{{radio.image_url}}" style="width: 128px; height: auto;">
                 <p>{{radio.name}}</p>
                 <a href="/admin/{{radio.id}}"><button class="w3-button w3-black">View</button></a>&nbsp;&nbsp;&nbsp;&nbsp;<a
-                href="/external_link?url={{radio.link}}"><button class="w3-button w3-black">Listen</button></a>
+                href="/{{radio.link}}"><button class="w3-button w3-black">Listen</button></a>
             </div></li>
             {% endfor %}
         </ul>
